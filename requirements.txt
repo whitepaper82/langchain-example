@@ -1,0 +1,15 @@
+# 핵심 패키지들
+langchain>=0.1.0
+langchain-openai>=0.0.5
+langchain-community>=0.0.10
+langchain-core>=0.1.0
+serpapi>=0.1.5
+numexpr>=2.8.4
+openai>=1.0.0
+python-dotenv>=1.0.0
+
+# 추가 유용한 패키지들
+faiss-cpu
+tiktoken
+# LangSmith 추적을 위한 패키지
+langsmith
