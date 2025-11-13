@@ -14,7 +14,10 @@
 1. 가상환경 생성 (권장):
 ```bash
 python -m venv venv
+
 source venv/bin/activate  # Windows: venv\Scripts\activate
+또는
+.\venv\Scripts\Activate.ps1 # PowerShell
 ```
 
 2. 패키지 설치:
@@ -25,9 +28,13 @@ pip install -r requirements.txt
 3. 환경 변수 설정:
 `.env` 파일을 생성하고 다음 내용을 추가하세요:
 ```
-OPENAI_API_KEY=your_openai_api_key
-LANGCHAIN_API_KEY=your_langsmith_api_key
-SERPAPI_API_KEY=your_serpapi_key
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_ENDPOINT='https://api.smith.langchain.com'
+LANGCHAIN_API_KEY=
+LANGCHAIN_PROJECT=langchain_example
+
+SLACK_BOT_TOKEN='xoxb-9500...oQkY'
+SLACK_CHANNEL='C09K..'
 ```
 
 ## 실행 방법

@@ -3,7 +3,7 @@ from langchain_core.prompts import (
     FewShotPromptTemplate,
 )
 # ChatOpenAI는 임포트만 하고 Ollama를 사용합니다.
-from langchain_openai import ChatOpenAI 
+#from langchain_openai import ChatOpenAI 
 from langchain_core.output_parsers import StrOutputParser
 from langchain_ollama import ChatOllama
 

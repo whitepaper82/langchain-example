@@ -13,3 +13,9 @@ faiss-cpu
 tiktoken
 # LangSmith 추적을 위한 패키지
 langsmith
+
+langchainhub
+langchain_ollama 
+
+slack_sdk
+chromadb

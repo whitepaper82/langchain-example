@@ -1,0 +1,50 @@
+from langchain_core.prompts import PromptTemplate
+
+# 1. 예제 데이터 풀 정의
+examples = [
+    {"input": "happy", "output": "sad"},
+    {"input": "tall", "output": "short"},
+    {"input": "bad", "output": "good"},
+    {"input": "sunny", "output": "gloomy"},
+    {"input": "hot", "output": "cold"},
+]
+
+# 2. 개별 예제를 포맷팅할 템플릿 정의
+example_prompt = PromptTemplate(
+    input_variables=["input", "output"],
+    template="Input: {input}\nOutput: {output}",
+)
+
+# pip install langchain-ollama chromadb
+# ollama pull nomic-embed-text
+
+from langchain_core.example_selectors import SemanticSimilarityExampleSelector
+from langchain_ollama import OllamaEmbeddings  # OllamaEmbeddings
+from langchain_community.vectorstores import Chroma
+
+# 1. 임베딩 모델 설정 (Ollama에서 지원하는 임베딩 모델 지정 필요)
+# 주의: 'llama3.1' 같은 채팅 모델보다는 임베딩 전용 모델 사용을 권장합니다.
+embeddings = OllamaEmbeddings(
+    model="nomic-embed-text"  # 사용할 Ollama 모델 이름
+)
+
+# 2. ExampleSelector 인스턴스화
+example_selector = SemanticSimilarityExampleSelector.from_examples(
+    examples,                 # 사용할 예제 풀
+    embeddings,               # Ollama 임베딩 모델 객체
+    Chroma,                   # 벡터를 저장하고 검색할 VectorStore 클래스
+    k=1                       # 입력과 가장 유사한 1개의 예제를 선택 
+)
+
+from langchain_core.prompts import FewShotPromptTemplate
+
+# 4. FewShotPromptTemplate 구성 (dynamic_prompt)
+dynamic_prompt = FewShotPromptTemplate(
+    example_selector=example_selector,    # 정적 'examples' 대신 'example_selector' 사용
+    example_prompt=example_prompt,
+    prefix="모든 입력에 대해 반의어를 제공하세요.",
+    suffix="Input: {adjective}\nOutput:",
+    input_variables=["adjective"],        # 사용자로부터 'adjective' 입력을 받음
+    example_separator="\n\n"
+)
+print(dynamic_prompt.format(adjective="worried"))  # windy
