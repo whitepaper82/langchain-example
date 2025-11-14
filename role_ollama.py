@@ -9,7 +9,7 @@ llm = ChatOllama(
     model='gemma3:4b',
     temperature=0.2,
     num_ctx=1024,
-    num_predict=200
+    num_predict=1024 #200
 )
 
 # --- 원본 프롬프트 정의 ---
