@@ -27,7 +27,6 @@ text_splitter = CharacterTextSplitter(
     chunk_size=500, # 청크당 최대 토큰 수 (예시: 500 토큰)
     chunk_overlap=100, # 청크 간 겹치는 토큰 수
     length_function=count_gemma_tokens, # 토큰 수를 세는 함수 지정 (가장 중요)
-    is_recursive=False # 재귀적 분할을 사용할지 여부
 )
 
 # 4. 텍스트 분할 실행
@@ -42,3 +41,5 @@ print(f"생성된 청크 수: {len(chunks)}개")
 print(f"첫 번째 청크의 내용:\n--- \n{chunks[0].page_content[:200]}...\n---")
 # 첫 번째 청크의 실제 토큰 수 확인 (optional)
 print(f"첫 번째 청크의 토큰 수: {count_gemma_tokens(chunks[0].page_content)}")
+
+print(f"토큰큰 문자열: {tokenizer.tokenize(chunks[0].page_content)}")

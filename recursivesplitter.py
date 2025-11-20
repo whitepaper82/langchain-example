@@ -28,7 +28,6 @@ for i, chunk in enumerate(chunks):
     print(f"내용: {chunk}")
     print("-" * 30)
 
-
 # 단순 분할기(CharacterTextSplitter) 설정
 # separator="": 띄어쓰기나 줄바꿈 고려 없이 25자가 되면 무조건 자릅니다.
 text_splitter = CharacterTextSplitter(
