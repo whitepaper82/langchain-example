@@ -49,3 +49,8 @@ python openai_tool.py
 - LangSmith를 통한 실행 추적
 - 웹 검색 및 수학 계산 도구
 - Ollama 로컬 모델 지원
+
+## 예제 코드 및 데이터 참고
+- 일부 코드 및 데이터는 아래 wikidocs를 참고했습니다.
+- <랭체인LangChain 노트>- LangChain 한국어 튜토리얼KR
+- 랭체인(LangChain) 입문부터 응용까지

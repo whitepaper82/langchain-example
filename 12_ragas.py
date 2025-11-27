@@ -6,12 +6,13 @@ from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_ollama import ChatOllama, OllamaEmbeddings
 
 from ragas.testset import TestsetGenerator
+from ragas.testset.evolutions import simple, reasoning, multi_context
 
 
 # — 1. LLM & Embeddings 세팅 (Ollama 사용 예시) —  
 llm = ChatOllama(
     base_url="http://localhost:11434",  # Ollama 서버 주소
-    model="gemma3:4b",
+    model="gemma3:1b",
     temperature=0.3,
 )
 
@@ -32,8 +33,9 @@ for doc in docs:
 
 # — 3. RAGAS TestsetGenerator 초기화 —  
 generator = TestsetGenerator.from_langchain(
-    llm=llm,
-    embedding_model=embedding_model,
+    generator_llm=llm,
+    critic_llm=llm,
+    embeddings=embedding_model,
 )
 
 # — 4. testset 생성 —  
@@ -41,7 +43,7 @@ print("Ollama + RAGAS: testset 생성 시작...")
 
 testset = generator.generate_with_langchain_docs(
     documents=docs,
-    testset_size=5,  # 생성할 질문 수
+    test_size=5,  # 생성할 질문 수
     distributions={
         simple: 0.5,        # 단순 질문
         reasoning: 0.25,    # 추론 질문
