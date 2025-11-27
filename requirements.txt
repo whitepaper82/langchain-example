@@ -1,22 +1,25 @@
 # 핵심 패키지들
 langchain 
-langchain-openai 
+#langchain-openai 
 langchain-community 
 langchain-core
 serpapi>=0.1.5
 numexpr>=2.8.4
-openai>=1.0.0
+#openai>=1.0.0
 python-dotenv>=1.0.0
 
 # 추가 유용한 패키지들
-faiss-cpu
-tiktoken
+#faiss-cpu
+#tiktoken
 # LangSmith 추적을 위한 패키지
 langsmith
 
 langchainhub
 langchain_ollama 
 
-slack_sdk
+#slack_sdk
 chromadb
-nltk
+#nltk
+
+pymupdf
+ragas

@@ -5,7 +5,7 @@ from langchain_text_splitters import CharacterTextSplitter
 # Gemma 모델의 토크나이저와 동일한 것을 사용합니다.
 # 실제 모델 이름(예: 'google/gemma-2-9b')을 사용해야 정확합니다.
 try:
-    tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-9b")
+    tokenizer = AutoTokenizer.from_pretrained("google/gemma-3-12b-it")
 except Exception as e:
     # 예외 발생 시, 토크나이저 파일이 로컬에 없거나 네트워크 문제일 수 있음
     print(f"토크나이저 로드 실패. 'google/gemma-2-9b'가 최신 Gemma 3 모델의 예시입니다. 오류: {e}")
