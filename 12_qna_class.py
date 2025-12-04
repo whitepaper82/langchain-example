@@ -38,7 +38,7 @@ class QnAAgent:
         # 2. LLM 설정
         self.llm = ChatOllama(
             base_url="http://localhost:11434",
-            model="gemma3:1b"
+            model="kimjk/llama3.2-korean"
         )
         
         # 3. 임베딩 모델 설정

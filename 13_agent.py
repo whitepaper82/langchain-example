@@ -33,25 +33,26 @@ def main():
     # 환경 변수 로드
     load_dotenv()
 
+
     # 1. LLM 초기화 (Ollama 사용)
     llm = ChatOllama(
         base_url="http://localhost:11434",
-        model="llama3.2:1b"
+        model="kimjk/llama3.2-korean"
     )
-    print("✅ LLM(llama3.2:3b) 초기화 완료")
+    print("✅ LLM(llama3.2-korean) 초기화 완료")
 
     # 2. 도구(Tools) 준비
 
     # (1) QnA 에이전트 도구
     # QnAAgent 인스턴스 생성
-    qna_agent_instance = QnAAgent()
+    #qna_agent_instance = QnAAgent()
     
     # QnA 기능을 Tool로 래핑
-    qna_tool = Tool(
-        name="PDF_QnA",
-        func=qna_agent_instance.answer,
-        description="SPRi AI 산업동향 PDF 문서에 대한 질문에 답변할 때 사용합니다. 입력값은 질문 문자열입니다."
-    )
+    #qna_tool = Tool(
+    #    name="PDF_QnA",
+    #    func=qna_agent_instance.answer,
+    #    description="SPRi AI 산업동향 PDF 문서에 대한 질문에 답변할 때 사용합니다. 입력값은 질문 문자열입니다."
+    #)
 
     # (2) Tavily 검색 에이전트 도구
     tavily_agent_instance = TavilySearchAgent()
@@ -66,7 +67,7 @@ def main():
 
     # 모든 도구를 리스트로 통합
     tools = [
-        qna_tool,
+        #qna_tool,
         search_tool,
         add_numbers,
         multiply_numbers

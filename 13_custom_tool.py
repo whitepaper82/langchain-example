@@ -28,3 +28,17 @@ print(f"도구 이름: {multiply_numbers.name}")   # multiply_numbers
 # LangChain이 생성한 args_schema를 확인해봅니다.
 schema = add_numbers.args_schema # .args 속성을 통해 스키마에 접근 가능
 print(schema)
+
+
+from langchain_ollama import ChatOllama
+
+tools = [add_numbers, multiply_numbers] #, python_tool]
+
+llm = ChatOllama(
+    base_url="http://localhost:11434",  # Ollama 서버 주소
+    model="kimjk/llama3.2-korean",
+    temperature=0.3,
+)
+
+llm_with_tools = llm.bind_tools(tools)
+llm_with_tools.invoke("1 + 3 = ?")
