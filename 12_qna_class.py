@@ -17,7 +17,7 @@ from langchain_core.prompts import PromptTemplate
 
 class QnAAgent:
     """
-    PDF 문서를 로드하고 질문에 답변하는 Q&A 에이전트 클래스입니다.
+    SPRi AI Brief PDF 문서를 로드하고 질문에 답변하는 Q&A 에이전트 클래스입니다.
     """
     
     def __init__(self, pdf_path: str = './data/SPRi AI Brief_11월호_산업동향_1105_F.pdf', model_id: str = "google/gemma-3-12b-it"):

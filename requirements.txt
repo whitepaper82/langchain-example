@@ -3,6 +3,7 @@ langchain
 #langchain-openai 
 langchain-community 
 langchain-core
+langchain_classic
 #serpapi>=0.1.5
 #numexpr>=2.8.4
 #openai>=1.0.0
@@ -22,4 +23,7 @@ chromadb
 #nltk
 
 pymupdf
-ragas==0.1.21
+ragas>=0.1.21
+
+#dotenv
+transformers

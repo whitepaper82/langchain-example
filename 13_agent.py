@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 # LangChain 관련 임포트
 from langchain_core.tools import Tool
 from langchain_ollama import ChatOllama
+from langchain_core.messages import HumanMessage
+from langchain.agents import create_agent
 
 # 우리가 만든 모듈 임포트
 # 1. QnA Class (12_qna_class.py)
@@ -21,17 +23,69 @@ qna_module = importlib.import_module("12_qna_class")
 QnAAgent = qna_module.QnAAgent
 
 # 13_travily_class.py 동적 임포트
+# 13_travily_class.py 동적 임포트
 travily_module = importlib.import_module("13_travily_class")
 TavilySearchAgent = travily_module.TavilySearchAgent
 
-# 13_custom_tool.py 동적 임포트
+#custom_tool_module = importlib.import_module("13_custom_tool")
 custom_tool_module = importlib.import_module("13_custom_tool")
 add_numbers = custom_tool_module.add_numbers
 multiply_numbers = custom_tool_module.multiply_numbers
 
+#from langchain_core.tools import tool
+#@tool
+#def add_numbers(a: int, b: int) -> int:
+#    """Add two numbers"""
+#    return a + b
+#
+#@tool
+#def multiply_numbers(a: int, b: int) -> int:
+#    """Multiply two numbers"""
+#    return a * b
+
+# Helper function to print answer and tool usage
+def print_result_with_tool_usage(result):
+    from langchain_core.messages import AIMessage
+    
+    # 1. Collect used tools
+    used_tools = []
+    # 결과가 dict이고 messages 키가 있는 경우 (LangGraph agent)
+    if isinstance(result, dict) and "messages" in result:
+        for msg in result["messages"]:
+            if isinstance(msg, AIMessage) and msg.tool_calls:
+                for tool_call in msg.tool_calls:
+                    used_tools.append(tool_call['name'])
+        final_content = result["messages"][-1].content
+    else:
+        # Fallback
+        final_content = str(result)
+    
+    if used_tools:
+        print(f"🛠️  사용된 도구: {', '.join(used_tools)}")
+    else:
+        print("🛠️  사용된 도구: 없음")
+
+    # 2. Print final answer
+    print("답변:", final_content)
+
 def main():
     # 환경 변수 로드
     load_dotenv()
+
+    # LangSmith 모니터링 설정
+    # .env 파일에 LANGCHAIN_API_KEY가 있어야 합니다.
+    # 만약 환경변수가 설정되어 있지 않다면 강제로 설정합니다.
+    if os.getenv("LANGCHAIN_TRACING_V2") is None:
+        os.environ["LANGCHAIN_TRACING_V2"] = "true"
+    
+    # 프로젝트 이름은 원하는 이름으로 설정하세요 on LangSmith >> Projects
+    os.environ["LANGCHAIN_PROJECT"] = "Ollama-Agent-Monitoring"
+
+    # API Key 확인
+    if not os.getenv("LANGCHAIN_API_KEY"):
+        print("⚠️  WARNING: LANGCHAIN_API_KEY가 설정되지 않았습니다. LangSmith 모니터링이 작동하지 않을 수 있습니다.")
+    else:
+        print(f"✅ LangSmith Tracing Enabled (Project: {os.getenv('LANGCHAIN_PROJECT')})")
 
 
     # 1. LLM 초기화 (Ollama 사용)
@@ -45,29 +99,30 @@ def main():
 
     # (1) QnA 에이전트 도구
     # QnAAgent 인스턴스 생성
-    #qna_agent_instance = QnAAgent()
+    qna_agent_instance = QnAAgent()
     
     # QnA 기능을 Tool로 래핑
-    #qna_tool = Tool(
-    #    name="PDF_QnA",
-    #    func=qna_agent_instance.answer,
-    #    description="SPRi AI 산업동향 PDF 문서에 대한 질문에 답변할 때 사용합니다. 입력값은 질문 문자열입니다."
-    #)
+    qna_tool = Tool(
+        name="SPRi_QA",
+        func=qna_agent_instance.answer,
+        description="SPRi AI Brief 관련 질문에 대해서는 반드시 이 도구를 사용해야 합니다. 입력값은 질문 문자열입니다.",
+        return_direct=True
+    )
 
     # (2) Tavily 검색 에이전트 도구
     tavily_agent_instance = TavilySearchAgent()
     # TavilySearchAgent에서 제공하는 도구 가져오기
     search_tool = tavily_agent_instance.get_general_search_tool()
     # 도구 이름과 설명이 이미 설정되어 있지만, 필요하다면 수정 가능
-    # search_tool.name = "Web_Search"
-    # search_tool.description = "최신 정보나 웹 검색이 필요할 때 사용합니다."
+    search_tool.name = "Web_Search"
+    search_tool.description = "웹 검색이 필요한 질문에 대해서는 반드시 이 도구를 사용해야 합니다."
 
     # (3) 커스텀 계산 도구
     # add_numbers, multiply_numbers는 이미 @tool 데코레이터로 정의됨
 
     # 모든 도구를 리스트로 통합
     tools = [
-        #qna_tool,
+        qna_tool,
         search_tool,
         add_numbers,
         multiply_numbers
@@ -75,70 +130,41 @@ def main():
     
     print(f"✅ 사용 가능한 도구: {[t.name for t in tools]}")
 
-    # 3. 에이전트 초기화 (create_react_agent 사용)
-    # initialize_agent는 deprecated 되었거나 import 에러가 발생하므로 create_react_agent 사용
-    from langchain.agents import create_agent
-    from langchain_classic import hub
+    # 3. 에이전트 초기화 (create_agent 사용)
+    # 시스템 프롬프트 정의: 루프 방지 및 도구 사용 가이드
+    system_prompt = (
+        "당신은 유능한 AI 어시스턴트입니다. 질문에 답하기 위해 사용 가능한 도구를 활용하세요. "
+        "도구가 반환한 정보를 바탕으로 답변을 작성하세요. "
+        "만약 도구에서 유용한 정보를 얻지 못했다면, 솔직하게 모른다고 대답하거나 대안을 제시하세요. "
+        "절대로 동일한 입력으로 같은 도구를 반복해서 호출하지 마세요. "
+        "최종 답변은 한국어로 작성해 주세요."
+    )
+    
+    # 에이전트 생성 (LangGraph 기반)
+    agent = create_agent(llm, tools, system_prompt=system_prompt)
 
-    # ReAct 프롬프트 로드
-    # hub.pull("hwchase17/react")를 사용하거나 직접 정의할 수 있습니다.
-    # 여기서는 hub에서 가져오는 방식을 시도합니다.
-    try:
-        prompt = hub.pull("hwchase17/react")
-    except Exception as e:
-        print(f"⚠️ 프롬프트 로드 실패, 기본 프롬프트를 사용합니다: {e}")
-        from langchain_core.prompts import PromptTemplate
-        prompt = PromptTemplate.from_template(
-            """Answer the following questions as best you can. You have access to the following tools:
-
-{tools}
-
-Use the following format:
-
-Question: the input question you must answer
-Thought: you should always think about what to do
-Action: the action to take, should be one of [{tool_names}]
-Action Input: the input to the action
-Observation: the result of the action
-... (this Thought/Action/Action Input/Observation can repeat N times)
-Thought: I now know the final answer
-Final Answer: the final answer to the original input question
-
-Begin!
-
-Question: {input}
-Thought:{agent_scratchpad}"""
-        )
-
-    # 에이전트 생성
-    agent = create_agent(llm, tools)
-
-    # 에이전트 실행기 생성
-    #agent_executor = AgentExecutor(
-    #    agent=agent, 
-    #    tools=tools, 
-    #    verbose=True, 
-    #    handle_parsing_errors=True
-    #)
-    #print("✅ 에이전트 생성 완료 (create_react_agent)")
+    print("✅ 에이전트 생성 완료 (create_agent + System Prompt)")
 
     # 4. 에이전트 실행 테스트
     print("\n========== 에이전트 테스트 시작 ==========")
     
     # 시나리오 1: PDF 문서 관련 질문
-    query1 = "SPRi AI Brief에서 말하는 구글의 최신 동영상 생성 AI 모델 이름은 뭐야?"
+    query1 = "SPRi AI Brief 문서 내용 중 구글의 최신 동영상 생성 AI 모델 이름은 뭐야?"
     print(f"\n[질문 1] {query1}")
-    agent.invoke({"input": query1})
+    result = agent.invoke({"messages": [HumanMessage(content=query1)]})
+    print_result_with_tool_usage(result)
 
     # 시나리오 2: 웹 검색이 필요한 질문
-    query2 = "현재 한국의 대통령은 누구야?"
+    query2 = "현재 한국의 대통령이 누구인지 웹 검색을 해서 알려주세요"
     print(f"\n[질문 2] {query2}")
-    agent.invoke({"input": query2})
+    result = agent.invoke({"messages": [HumanMessage(content=query2)]})
+    print_result_with_tool_usage(result)
 
     # 시나리오 3: 계산이 필요한 질문
     query3 = "123 더하기 456은 몇이야? 그리고 그 결과에 2를 곱해줘."
     print(f"\n[질문 3] {query3}")
-    agent.invoke({"input": query3})
+    result = agent.invoke({"messages": [HumanMessage(content=query3)]})
+    print_result_with_tool_usage(result)
 
 if __name__ == "__main__":
     main()

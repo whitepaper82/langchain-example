@@ -41,4 +41,5 @@ llm = ChatOllama(
 )
 
 llm_with_tools = llm.bind_tools(tools)
-llm_with_tools.invoke("1 + 3 = ?")
+result_llm = llm_with_tools.invoke("1 + 3 = ?")
+print(result_llm.content)

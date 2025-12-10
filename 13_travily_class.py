@@ -1,3 +1,4 @@
+
 import os
 from dotenv import load_dotenv
 from langchain_community.tools.tavily_search import TavilySearchResults
@@ -5,7 +6,7 @@ from typing import List
 
 class TavilySearchAgent:
     """
-    TavilySearchResults 도구를 사용하여 검색을 수행하는 클래스입니다.
+    TavilySearchResults 도구를 사용하여 웹 검색을 수행하는 클래스입니다.
     """
     
     def __init__(self, max_results: int = 5):
